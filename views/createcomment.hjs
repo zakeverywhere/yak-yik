@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ title }}</title>
+  </head>
+  <body>
+    <h1>create comment</h1>
+
+    <form action="/api/comment" method="post">
+    	<input type="text" name="username" placeholder="User Name" /><br>
+    	<input type="text" name="body" placeholder="Comment" /><br> 
+    	<input type="submit" value="Create Comment" /><br> 
+
+    </form>
+  </body>
+</html>
