@@ -8,6 +8,7 @@ class Comment extends Component {
 				{this.props.curComment.username}
 				<span>|</span>
 				{this.props.curComment.timestamp}
+				<hr/>
 			</div>
 		)
 	}

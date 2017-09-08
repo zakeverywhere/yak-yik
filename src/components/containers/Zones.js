@@ -1,61 +1,62 @@
 import React, {Component} from 'react'
-import Zone from '../presentation/Zone.js'
-import superagent from 'superagent'
+import { Zone, CreateZone} from '../presentation/index'
+import { APIManager } from '../../utils'
+import { connect } from 'react-redux'
+import actions from '../../actions/actions'
 
 class Zones extends Component {
 	constructor(){
 		super()
 		this.state = {
-			list: [],
-			zone: {
-				name:'',
-				zipCodes:''
-			}
 		}
 	}
 
 	componentDidMount(){
-		console.log("componentDidMount")
-		
-		superagent
-		.get('/api/zone')
-		.query(null)
-		.set('Accept','application/json')
-		.end((err,response) => {
-			
-			if(err){
-				alert('ERROR: '+err)
+		APIManager.get('/api/zone',null,(err,response) => {
+				if (err) {
+					alert('ERROR: ' + err)
+					return
+				}
+
+				let zones = response.results
+				this.props.zonesReceived(zones)
+		})
+	}
+
+
+
+	addZone(updatedZone){
+		APIManager.post('/api/zone', updatedZone, (err, response) => {
+			if (err) {
+				alert('ERROR: ' + err)
 				return
 			}
 
-			let results = response.body.results
-			this.setState({
-				list: results
-			})
+			this.props.zoneCreated(response.message)
+			// let updatedList = Object.assign([],this.state.list)
+			// updatedList.push(response.message)
+			// this.setState({
+			// 	list: updatedList
+			// })
 		})
 	}
 
-	updateZone(evt){
-		let updatedZone = Object.assign({},this.state.zone)
-
-		updatedZone[evt.target.id] = evt.target.value
-
-		this.setState({
-			zone: updatedZone
-		})
-	}
-	addZone(evt){
-		let updatedList = Object.assign([],this.state.list)
-		updatedList.push(this.state.zone)
-		this.setState({
-			list: updatedList
-		})
+	selectZone(key){
+		this.props.zoneSelected(key)
 	}
 
 	render(){
-		const listItems = this.state.list.map((zone,index) =>{
+		const listItems = this.props.list.map((zone,index) =>{
+			const selected = (index == this.props.selected) 
 			return (
-				<li key={index}><Zone currentZone={zone} /></li>
+				<li key={index}>
+					<Zone index={index} 
+					onSelect={this.selectZone.bind(this)} 
+					isSelected={selected} 
+					currentZone={zone} />
+
+
+				</li>
 			)
 		});
 
@@ -64,12 +65,28 @@ class Zones extends Component {
 				<ol>
 					{listItems}
 				</ol>
-				<input id="name" onChange={this.updateZone.bind(this)} className="form-control" placeholder="Name"></input>
-				<input id="zipCodes" onChange={this.updateZone.bind(this)} className="form-control" placeholder="Zip Codes"></input>
-				<button onClick={this.addZone.bind(this)} className="btn btn-danger"> add zone </button>
+				<CreateZone onCreate={this.addZone.bind(this)}/>
+				
 			</div>
 		)
 	}
 }
 
-export default Zones
+const stateToProps = (state) => {
+	return {
+		list: state.zone.list,
+		selected: state.zone.selected
+	}
+}
+
+const dispatchToProps = (dispatch) => {
+	return {
+		zoneSelected: (index) => dispatch(actions.zoneSelected(index)),
+		zonesReceived: (zones) => dispatch(actions.zonesReceived(zones)),
+		zoneCreated: (zone) => dispatch(actions.zoneCreated(zone))
+	}
+}
+
+export default connect(stateToProps,dispatchToProps)(Zones)
+
+

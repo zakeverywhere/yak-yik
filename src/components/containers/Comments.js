@@ -1,77 +1,43 @@
 import React, {Component} from 'react'
-import Comment from '../presentation/Comment'
+import { Comment,CreateComment } from '../presentation'
 import styles from './styles'
-import superagent from 'superagent'
+import { APIManager } from '../../utils'
+import { connect } from 'react-redux'
+import actions from '../../actions/actions'
+
 class Comments extends Component {
 	constructor(){
 		super()
 		this.state = {
-			list: [],
-			comment:{
-				username:'',
-				body:''
-			}
-
+			list: []
 		}
 	}
 
 	componentDidMount(){
-		superagent
-		.get('/api/comment')
-		.query(null)
-		.set('Accept','application/json')
-		.end((err,response) => {
-			
+		APIManager.get('/api/comment', null, (err,response) => {
 			if(err){
-				alert("ERROR: " + err);
+				alert("ERROR: " + err) 
 				return
 			}
-
-			let results = response.body.results
+			
 			this.setState({
-				list:results
+				list:response.results
 			})
-
-		})
-
-	}
-
-	submitComment(){
-		let updatedList = Object.assign([],this.state.list)
-		updatedList.push(this.state.comment);
-
-		this.setState({
-			list: updatedList
-		})
-		
-	}
-
-	updateUsername(evt){
-		
-		let updatedUsername = Object.assign({}, this.state.comment)
-		updatedUsername['username'] = evt.target.value
-		
-		this.setState({
-			comment: updatedUsername
 		})
 	}
 
-	updateBody(evt){
-		
-		let updatedComment = Object.assign({}, this.state.comment)
-		updatedComment['body'] = evt.target.value
-		
-		this.setState({
-			comment: updatedComment
-		})
-	}
+	submitComment(comment){
+		APIManager.post('api/comment',comment,(err,response) => {
+				if (err) {
+					alert('ERROR: ' + err)
+					return
+				} 
 
-	updateTimestamp(evt){
-		let updatedComment = Object.assign({}, this.state.comment)
-		updatedComment['timestamp'] = evt.target.value
-		
-		this.setState({
-			comment: updatedComment
+				let updatedList = Object.assign([],this.state.list)
+				updatedList.push(response.message);
+				this.setState({
+					list: updatedList
+				})
 		})
 	}
 
@@ -81,23 +47,27 @@ class Comments extends Component {
 			return <li key={index}><Comment curComment={comment} /></li>
 		})
 
+		const selectedZone = this.props.zones[this.props.index]
+		const zoneName = (selectedZone == null)? '':selectedZone.name
 		return (
 			<div>
-				<h2>Comments: Zone 1</h2>
+				<h2>{zoneName}</h2>
 				<div style={style.commentsBox}>
 					<ul style={style.commentsList}>
 						{commentList}
 					</ul>
+
+					<CreateComment onCreate={this.submitComment.bind(this)} />
 				</div>
-
-				<input onChange={this.updateUsername.bind(this)} className="form-control" type="text" placeholder="Username" /> <br />
-				<input onChange={this.updateBody.bind(this)} className="form-control" type="text" placeholder="Comment" /><br />
-				<input onChange={this.updateTimestamp.bind(this)} className="form-control" type="text" placeholder="Timestamp" /><br />
-				<button onClick={this.submitComment.bind(this)} className="form-control"> Submit Comment </button>
-
 			</div>
 		)
 	}
 }
 
-export default Comments
+const stateToProps = (state) => {
+	return {
+		index: state.zone.selected,
+		zones: state.zone.list
+	}
+}
+export default connect(stateToProps)(Comments)
