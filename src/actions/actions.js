@@ -7,13 +7,13 @@ export default {
 			comment: comment
 		}
 	},
-	commentReceived: (comments) => {
+	commentReceived: (comments,zone) => {
 		return {
-			type: constants.COMMENT_RECEIVED
-			comments: comments
+			type: constants.COMMENT_RECEIVED,
+			comments: comments,
+			zone:zone
 		}
-	}
-
+	},
 	zoneSelected: (index) => {
 		return {
 			type: constants.ZONE_SELECTED,

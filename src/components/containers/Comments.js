@@ -9,46 +9,74 @@ class Comments extends Component {
 	constructor(){
 		super()
 		this.state = {
-			list: []
+
 		}
 	}
 
-	componentDidMount(){
-		APIManager.get('/api/comment', null, (err,response) => {
-			if(err){
-				alert("ERROR: " + err) 
-				return
-			}
-			
-			this.setState({
-				list:response.results
-			})
-		})
-	}
-
 	submitComment(comment){
-		APIManager.post('api/comment',comment,(err,response) => {
+		let updatedComment = Object.assign({},comment)
+
+		const zone = this.props.zones[this.props.index]
+		updatedComment['zone'] = zone._id
+
+		APIManager.post('api/comment',updatedComment,(err,response) => {
 				if (err) {
 					alert('ERROR: ' + err)
 					return
 				} 
+				this.props.commentCreated(response.message)
+		})
+	}
 
-				let updatedList = Object.assign([],this.state.list)
-				updatedList.push(response.message);
-				this.setState({
-					list: updatedList
-				})
+	componentDidMount(){
+		
+	}
+
+	componentDidUpdate(){
+		console.log("updating")		
+		let zone = this.props.zones[this.props.index]
+		if (zone == null) {
+			return
+		}
+
+		let comments = this.props.commentMap[zone._id] 
+		if(comments != null){
+			return
+		}
+
+		// // console.log('Component did update,Zone ' + zone._id)
+		// if (this.props.commentsLoaded == true){
+		// 	return
+		// } 
+
+		APIManager.get('/api/comment', {zone:zone._id}, (err,response) => {
+			if(err){
+				alert("ERROR: " + err) 
+				return
+			}
+			this.props.commentReceived(response.results,zone)
 		})
 	}
 
 	render(){
+
 		const style = styles.comment
-		const commentList = this.state.list.map((comment,index)=>{
-			return <li key={index}><Comment curComment={comment} /></li>
-		})
 
 		const selectedZone = this.props.zones[this.props.index]
-		const zoneName = (selectedZone == null)? '':selectedZone.name
+		let zoneName = null
+		let commentList = null
+
+		if (selectedZone != null) {
+			zoneName = selectedZone.name
+			let zoneComments = this.props.commentMap[selectedZone._id]
+			
+			if (zoneComments != null ) {
+				commentList = zoneComments.map((comment,index)=>{
+					return <li key={index}><Comment curComment={comment} /></li>
+				})
+			}
+		}
+
 		return (
 			<div>
 				<h2>{zoneName}</h2>
@@ -66,8 +94,18 @@ class Comments extends Component {
 
 const stateToProps = (state) => {
 	return {
+		commentMap: state.comment.map,
 		index: state.zone.selected,
-		zones: state.zone.list
+		zones: state.zone.list,
+		commentsLoaded: state.comment.loaded
 	}
 }
-export default connect(stateToProps)(Comments)
+
+const dispatchToProps = (dispatch) => {
+	return {
+		commentCreated: (comment) => {dispatch(actions.commentCreated(comment))},
+		commentReceived: (comments,zone) => {dispatch(actions.commentReceived(comments,zone))}	
+	}
+}
+
+export default connect(stateToProps,dispatchToProps)(Comments)

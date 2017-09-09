@@ -11,20 +11,6 @@ class Zones extends Component {
 		}
 	}
 
-	componentDidMount(){
-		APIManager.get('/api/zone',null,(err,response) => {
-				if (err) {
-					alert('ERROR: ' + err)
-					return
-				}
-
-				let zones = response.results
-				this.props.zonesReceived(zones)
-		})
-	}
-
-
-
 	addZone(updatedZone){
 		APIManager.post('/api/zone', updatedZone, (err, response) => {
 			if (err) {
@@ -43,6 +29,18 @@ class Zones extends Component {
 
 	selectZone(key){
 		this.props.zoneSelected(key)
+	}
+
+	componentDidMount(){
+		APIManager.get('/api/zone',null,(err,response) => {
+				if (err) {
+					alert('ERROR: ' + err)
+					return
+				}
+
+				let zones = response.results
+				this.props.zonesReceived(zones)
+		})
 	}
 
 	render(){
@@ -88,5 +86,3 @@ const dispatchToProps = (dispatch) => {
 }
 
 export default connect(stateToProps,dispatchToProps)(Zones)
-
-
