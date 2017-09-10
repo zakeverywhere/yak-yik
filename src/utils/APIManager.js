@@ -1,5 +1,4 @@
 import superagent from 'superagent'
-import APIManager from '../../utils'
 
 export default {
 	get: (url,params,callback) => {

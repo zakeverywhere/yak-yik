@@ -1,6 +1,3 @@
-//need to implement update and remove
-
-
 var express = require('express')
 var router = express.Router()
 var controllers = require('../controllers/index')

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-
+import { APIManager } from '../../utils'
 class Account extends Component {
 	constructor(){
 		super()
@@ -11,15 +11,59 @@ class Account extends Component {
 		}
 	}
 
-	signup(evt){
+	login(evt) {
 		evt.preventDefault()
-		console.log(this.state.profile)
 		if (this.state.profile.username.length == 0 ){
 			alert("please enter a username")
+			return
 		}
 		if (this.state.profile.password.length == 0 ){
 			alert("please enter a password")
+			return
 		}
+
+		APIManager.post('/account/login', this.state.profile , (err, result) => {
+			if (err) {
+				alert(err.message)
+				return
+			}
+			
+			const confirmation = result.confirmation
+			if(confirmation != 'success') {
+				alert(result.message)
+				return
+			}
+			console.log(result)
+		})
+	}
+
+	signup(evt){
+		evt.preventDefault()
+		
+		if (this.state.profile.username.length == 0 ){
+			alert("please enter a username")
+			return
+		}
+		if (this.state.profile.password.length == 0 ){
+			alert("please enter a password")
+			return
+		}
+
+		//TODO continue from here
+		APIManager.post('/api/profile', this.state.profile, (err, result) => {
+			if (err) {
+				alert(err)
+				return
+			}
+			
+			const confirmation = result.confirmation
+			if(confirmation != 'success') {
+				alert(result.message)
+				return
+			}
+
+			console.log(result)
+		})
 	}
 
 	updateProfile(evt) {
@@ -30,8 +74,6 @@ class Account extends Component {
 		this.setState({
 			profile: updated
 		})
-
-		console.log(evt.target.id + "==" + evt.target.value)
 	}
 
 	render() {
@@ -40,7 +82,7 @@ class Account extends Component {
 				<h2>Login</h2>
 				<input id='username' onChange={this.updateProfile.bind(this)} type='text' placeholder='username' /><br />
 				<input id='password' onChange={this.updateProfile.bind(this)} type='password' placeholder='password' /><br />
-				<button> Log In </button>
+				<button onClick={this.login.bind(this)}> Log In </button>
 				<br />
 				<h2>Sign Up</h2>
 				<input id='username' onChange={this.updateProfile.bind(this)} type='text' placeholder='username' /><br />

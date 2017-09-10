@@ -32,8 +32,7 @@ class Comments extends Component {
 		
 	}
 
-	componentDidUpdate(){
-		console.log("updating")		
+	componentDidUpdate(){	
 		let zone = this.props.zones[this.props.index]
 		if (zone == null) {
 			return
