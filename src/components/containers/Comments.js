@@ -17,7 +17,7 @@ class Comments extends Component {
 		}
 
 		let updatedComment = Object.assign({},comment)
-
+		
 		const zone = this.props.zones[this.props.index]
 		updatedComment['zone'] = zone._id
 		updatedComment['username'] = this.props.user.username
@@ -32,8 +32,10 @@ class Comments extends Component {
 	}
 
 	componentDidUpdate(){	
+
 		let zone = this.props.zones[this.props.index]
 		if (zone == null) {
+			console.log("zone is null")
 			return
 		}
 
@@ -41,11 +43,6 @@ class Comments extends Component {
 		if(comments != null){
 			return
 		}
-
-		// // console.log('Component did update,Zone ' + zone._id)
-		// if (this.props.commentsLoaded == true){
-		// 	return
-		// } 
 
 		APIManager.get('/api/comment', {zone:zone._id}, (err,response) => {
 			if(err){

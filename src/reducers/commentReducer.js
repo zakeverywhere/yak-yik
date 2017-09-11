@@ -12,8 +12,6 @@ export default (state = initialState, action) => {
 	switch (action.type) {
 
 		case constants.COMMENT_RECEIVED:
-			// console.log("zone received: " + JSON.stringify(action.zone))
-			
 			let zoneComments = updatedMap[action.zone._id]
 
 			if(zoneComments == null) {

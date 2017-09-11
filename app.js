@@ -17,7 +17,7 @@ mongoose.connect(dbUrl, function(err,res){
 	}
 })	
 
-var routes = require('./routes/index');
+var routes = require('./routes');
 var api = require('./routes/api');
 var account = require('./routes/account')
 

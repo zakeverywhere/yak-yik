@@ -8,34 +8,22 @@ class Profile extends Component {
 	constructor() {
 		super()
 		this.state = {
-			profile: null
+		
 		}
 	}
 
-	componentDidMount (){
-		
-		APIManager.get('/api/profile',{username:this.props.username}, (err, response) => {
-			if (err) {
-				alert (err.message)
-				return
-			} else {
-				if (response.results.length == 0){
-					alert('Profile not found!')
-				}
-
-				const profile = response.results[0]
-				this.props.profileReceived(profile)
-
-				// this.setState({
-				// 	profile: profile
-				// })
-			}
-		})
+	componentDidMount () {
+		const curProfile = this.props.profiles[this.props.username]
+		if(curProfile != null){
+			return
+		}
+		this.props.fetchProfile({username: this.props.username})
 	}
 
 	render (){
 		let header = null
-		const profile = this.state.profile
+		const profile = this.props.profiles[this.props.username]
+		
 		if (profile != null) {
 			header = (
 				<div>
@@ -45,9 +33,6 @@ class Profile extends Component {
 				</div>
 			)
 		}
-		const id = (this.state.profile == null)? null:<h3>{this.state.profile._id}</h3>
-		// const profileDiv= this.state.profile.map((field,index) => {
-		// }) 
 
 		return (
 			<div>
@@ -59,14 +44,14 @@ class Profile extends Component {
 
 const stateToProps = (state) => {
 	return {
-		profiles: state.profile.list
+		profiles: state.profile.map
 
 	}
 }
 
 const dispatchToProps = (dispatch) => {
 	return {
-		profileReceived: (profile) => {dispatch(actions.profileReceived(profile))}
+		fetchProfile: (params) => {dispatch(actions.fetchProfile(params))}
 	}
 }
 export default connect(stateToProps,dispatchToProps)(Profile)

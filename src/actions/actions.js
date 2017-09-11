@@ -1,10 +1,26 @@
 import constants from '../constants/constants'
+import { APIManager } from '../utils'
 
 export default {
-	profileReceived: (profile) => {
-		return {
-			type: constants.PROFILE_RECEIVED,
-			profile: profile
+	fetchProfile: (params) => {
+		return (dispatch) => {
+			APIManager.get('/api/profile', params, (err,response) => {
+				
+				if (err) {
+					console.log(err.message)
+					return
+				}
+
+				if (response.results.length == 0){
+					alert('Profile not found!')
+				}
+
+				const profile = response.results[0]
+				dispatch({
+					type: constants.FETCH_PROFILE,
+					profile: profile
+				})
+			})
 		}
 	},
 	commentCreated: (comment) => {
@@ -18,6 +34,22 @@ export default {
 			type: constants.COMMENT_RECEIVED,
 			comments: comments,
 			zone:zone
+		}
+	},
+	fetchZone: (params) => {
+		return (dispatch) => {
+			APIManager.get('/api/zone',params,(err,response) => {
+				if (err) {
+					alert('ERROR: ' + err)
+					return
+				}
+
+				const zones = response.results
+				dispatch({
+					type: constants.ZONES_RECEIVED,
+					zones: zones
+				})
+			})
 		}
 	},
 	zoneSelected: (index) => {

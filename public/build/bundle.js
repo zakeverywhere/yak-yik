@@ -5012,9 +5012,10 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 exports.default = {
-	PROFILE_RECEIVED: 'PROFILE_RECEIVED',
+	FETCH_PROFILE: 'FETCH_PROFILE',
 	COMMENT_CREATED: 'COMMENT_CREATED',
 	COMMENT_RECEIVED: 'COMMENT_RECEIVED',
+	FETCH_ZONE: 'FETCH_ZONE',
 	ZONE_SELECTED: 'ZONE_SELECTED',
 	ZONES_RECEIVED: 'ZONES_RECEIVED',
 	ZONE_CREATED: 'ZONE_CREATED',
@@ -7136,13 +7137,30 @@ var _constants = __webpack_require__(39);
 
 var _constants2 = _interopRequireDefault(_constants);
 
+var _utils = __webpack_require__(59);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
-	profileReceived: function profileReceived(profile) {
-		return {
-			type: _constants2.default.PROFILE_RECEIVED,
-			profile: profile
+	fetchProfile: function fetchProfile(params) {
+		return function (dispatch) {
+			_utils.APIManager.get('/api/profile', params, function (err, response) {
+
+				if (err) {
+					console.log(err.message);
+					return;
+				}
+
+				if (response.results.length == 0) {
+					alert('Profile not found!');
+				}
+
+				var profile = response.results[0];
+				dispatch({
+					type: _constants2.default.FETCH_PROFILE,
+					profile: profile
+				});
+			});
 		};
 	},
 	commentCreated: function commentCreated(comment) {
@@ -7156,6 +7174,22 @@ exports.default = {
 			type: _constants2.default.COMMENT_RECEIVED,
 			comments: comments,
 			zone: zone
+		};
+	},
+	fetchZone: function fetchZone(params) {
+		return function (dispatch) {
+			_utils.APIManager.get('/api/zone', params, function (err, response) {
+				if (err) {
+					alert('ERROR: ' + err);
+					return;
+				}
+
+				var zones = response.results;
+				dispatch({
+					type: _constants2.default.ZONES_RECEIVED,
+					zones: zones
+				});
+			});
 		};
 	},
 	zoneSelected: function zoneSelected(index) {
@@ -28648,6 +28682,7 @@ var Comments = function (_Component) {
 
 			var zone = this.props.zones[this.props.index];
 			if (zone == null) {
+				console.log("zone is null");
 				return;
 			}
 
@@ -28655,11 +28690,6 @@ var Comments = function (_Component) {
 			if (comments != null) {
 				return;
 			}
-
-			// // console.log('Component did update,Zone ' + zone._id)
-			// if (this.props.commentsLoaded == true){
-			// 	return
-			// } 
 
 			_utils.APIManager.get('/api/comment', { zone: zone._id }, function (err, response) {
 				if (err) {
@@ -29210,11 +29240,6 @@ var Zones = function (_Component) {
 				}
 
 				_this2.props.zoneCreated(response.result);
-				// let updatedList = Object.assign([],this.state.list)
-				// updatedList.push(response.message)
-				// this.setState({
-				// 	list: updatedList
-				// })
 			});
 		}
 	}, {
@@ -29225,30 +29250,29 @@ var Zones = function (_Component) {
 	}, {
 		key: 'componentDidMount',
 		value: function componentDidMount() {
-			var _this3 = this;
+			this.props.fetchZone(null);
+			// APIManager.get('/api/zone',null,(err,response) => {
+			// 		if (err) {
+			// 			alert('ERROR: ' + err)
+			// 			return
+			// 		}
 
-			_utils.APIManager.get('/api/zone', null, function (err, response) {
-				if (err) {
-					alert('ERROR: ' + err);
-					return;
-				}
-
-				var zones = response.results;
-				_this3.props.zonesReceived(zones);
-			});
+			// 		let zones = response.results
+			// 		this.props.zonesReceived(zones)
+			// })
 		}
 	}, {
 		key: 'render',
 		value: function render() {
-			var _this4 = this;
+			var _this3 = this;
 
 			var listItems = this.props.list.map(function (zone, index) {
-				var selected = index == _this4.props.selected;
+				var selected = index == _this3.props.selected;
 				return _react2.default.createElement(
 					'li',
 					{ key: index },
 					_react2.default.createElement(_index.Zone, { index: index,
-						onSelect: _this4.selectZone.bind(_this4),
+						onSelect: _this3.selectZone.bind(_this3),
 						isSelected: selected,
 						currentZone: zone })
 				);
@@ -29279,6 +29303,9 @@ var stateToProps = function stateToProps(state) {
 
 var dispatchToProps = function dispatchToProps(dispatch) {
 	return {
+		fetchZone: function fetchZone(params) {
+			dispatch(_actions2.default.fetchZone(params));
+		},
 		zoneSelected: function zoneSelected(index) {
 			return dispatch(_actions2.default.zoneSelected(index));
 		},
@@ -29330,11 +29357,6 @@ var ProfileInfo = function (_Component) {
 	}
 
 	_createClass(ProfileInfo, [{
-		key: 'componentDidMount',
-		value: function componentDidMount() {
-			console.log(this.props.match.params);
-		}
-	}, {
 		key: 'render',
 		value: function render() {
 			var username = this.props.match.params.username;
@@ -29529,8 +29551,6 @@ exports.default = function () {
 	switch (action.type) {
 
 		case _constants2.default.COMMENT_RECEIVED:
-			// console.log("zone received: " + JSON.stringify(action.zone))
-
 			var zoneComments = updatedMap[action.zone._id];
 
 			if (zoneComments == null) {
@@ -29582,7 +29602,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var initialState = {
 	selected: 0,
-	list: []
+	list: [],
+	appStatus: 'ready'
 };
 
 exports.default = function () {
@@ -29597,10 +29618,10 @@ exports.default = function () {
 
 		case _constants2.default.ZONES_RECEIVED:
 			updated['list'] = action.zones;
+			updated['appStatus'] = 'ready';
 			return updated;
 
 		case _constants2.default.ZONE_CREATED:
-
 			var updatedList = Object.assign([], updated.list);
 			updatedList.push(action.zone);
 			updated['list'] = updatedList;
@@ -32671,40 +32692,25 @@ var Profile = function (_Component) {
 
 		var _this = _possibleConstructorReturn(this, (Profile.__proto__ || Object.getPrototypeOf(Profile)).call(this));
 
-		_this.state = {
-			profile: null
-		};
+		_this.state = {};
 		return _this;
 	}
 
 	_createClass(Profile, [{
 		key: 'componentDidMount',
 		value: function componentDidMount() {
-			var _this2 = this;
-
-			_index.APIManager.get('/api/profile', { username: this.props.username }, function (err, response) {
-				if (err) {
-					alert(err.message);
-					return;
-				} else {
-					if (response.results.length == 0) {
-						alert('Profile not found!');
-					}
-
-					var profile = response.results[0];
-					_this2.props.profileReceived(profile);
-
-					// this.setState({
-					// 	profile: profile
-					// })
-				}
-			});
+			var curProfile = this.props.profiles[this.props.username];
+			if (curProfile != null) {
+				return;
+			}
+			this.props.fetchProfile({ username: this.props.username });
 		}
 	}, {
 		key: 'render',
 		value: function render() {
 			var header = null;
-			var profile = this.state.profile;
+			var profile = this.props.profiles[this.props.username];
+
 			if (profile != null) {
 				header = _react2.default.createElement(
 					'div',
@@ -32728,13 +32734,6 @@ var Profile = function (_Component) {
 					)
 				);
 			}
-			var id = this.state.profile == null ? null : _react2.default.createElement(
-				'h3',
-				null,
-				this.state.profile._id
-			);
-			// const profileDiv= this.state.profile.map((field,index) => {
-			// }) 
 
 			return _react2.default.createElement(
 				'div',
@@ -32749,15 +32748,15 @@ var Profile = function (_Component) {
 
 var stateToProps = function stateToProps(state) {
 	return {
-		profiles: state.profile.list
+		profiles: state.profile.map
 
 	};
 };
 
 var dispatchToProps = function dispatchToProps(dispatch) {
 	return {
-		profileReceived: function profileReceived(profile) {
-			dispatch(_actions2.default.profileReceived(profile));
+		fetchProfile: function fetchProfile(params) {
+			dispatch(_actions2.default.fetchProfile(params));
 		}
 	};
 };
@@ -32781,7 +32780,7 @@ var _constants2 = _interopRequireDefault(_constants);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var initialState = {
-	list: []
+	map: {}
 };
 
 exports.default = function () {
@@ -32791,15 +32790,10 @@ exports.default = function () {
 	var updated = Object.assign({}, state);
 
 	switch (action.type) {
-		case _constants2.default.PROFILE_RECEIVED:
-			// console.log("profile received:")
-			// console.log(action.profile)
-
-			var updatedList = Object.assign([], updated.list);
-			updatedList.push(action.profile);
-			updated['list'] = updatedList;
-
-			console.log(updated);
+		case _constants2.default.FETCH_PROFILE:
+			var updatedMap = Object.assign({}, updated.map);
+			updatedMap[action.profile.username] = action.profile;
+			updated['map'] = updatedMap;
 			return updated;
 
 		default:

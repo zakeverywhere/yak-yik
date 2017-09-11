@@ -19,11 +19,6 @@ class Zones extends Component {
 			}
 
 			this.props.zoneCreated(response.result)
-			// let updatedList = Object.assign([],this.state.list)
-			// updatedList.push(response.message)
-			// this.setState({
-			// 	list: updatedList
-			// })
 		})
 	}
 
@@ -32,15 +27,16 @@ class Zones extends Component {
 	}
 
 	componentDidMount(){
-		APIManager.get('/api/zone',null,(err,response) => {
-				if (err) {
-					alert('ERROR: ' + err)
-					return
-				}
+		this.props.fetchZone(null)
+		// APIManager.get('/api/zone',null,(err,response) => {
+		// 		if (err) {
+		// 			alert('ERROR: ' + err)
+		// 			return
+		// 		}
 
-				let zones = response.results
-				this.props.zonesReceived(zones)
-		})
+		// 		let zones = response.results
+		// 		this.props.zonesReceived(zones)
+		// })
 	}
 
 	render(){
@@ -52,8 +48,6 @@ class Zones extends Component {
 					onSelect={this.selectZone.bind(this)} 
 					isSelected={selected} 
 					currentZone={zone} />
-
-
 				</li>
 			)
 		});
@@ -79,6 +73,7 @@ const stateToProps = (state) => {
 
 const dispatchToProps = (dispatch) => {
 	return {
+		fetchZone: (params) => {dispatch(actions.fetchZone(params))},
 		zoneSelected: (index) => dispatch(actions.zoneSelected(index)),
 		zonesReceived: (zones) => dispatch(actions.zonesReceived(zones)),
 		zoneCreated: (zone) => dispatch(actions.zoneCreated(zone))
