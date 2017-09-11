@@ -12,9 +12,9 @@ export default {
 				return
 			}
 
-			let confirmation = response.body.confirmation
+			const confirmation = response.body.confirmation
 			if (confirmation != 'success') {
-				callback(JSON.stringify(response.body), null)
+				callback(response.body, null)
 				return
 			}
 
@@ -33,7 +33,7 @@ export default {
 				return
 			}
 
-			let confirmation = response.body.confirmation
+			const confirmation = response.body.confirmation
 			if (confirmation != 'success') {
 				callback(response.body, null)
 				return

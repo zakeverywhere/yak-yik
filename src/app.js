@@ -1,21 +1,21 @@
 import React, {Component} from 'react'
 import ReactDOM from 'react-dom'
-import Home from './components/layout/Home'
+import { Home, ProfileInfo} from './components/layout/index'
 import { Provider } from 'react-redux'
 import store from './stores/store'
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 
-class App extends Component {
-	render(){
-		return (
-			<Provider store = {store.configureStore()}>
-				<div>
-					Welcome to Yak-yik
-					<Home/>
-				</div>
-			</Provider>
+const app = (
+	<Provider store = { store.configureStore() }>
+		
+		<Router>
+			<Switch>
+				<Route exact path='/' component={Home} />
+				<Route exact path='/profile/:username' component={ProfileInfo} />
+			</Switch>
+		</Router>
 
-		)
-	}
-}
+	</Provider>
+)
 
-ReactDOM.render(<App />, document.getElementById('root'))
+ReactDOM.render(app, document.getElementById('root'))

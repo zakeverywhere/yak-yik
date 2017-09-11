@@ -1,6 +1,12 @@
 import constants from '../constants/constants'
 
 export default {
+	profileReceived: (profile) => {
+		return {
+			type: constants.PROFILE_RECEIVED,
+			profile: profile
+		}
+	},
 	commentCreated: (comment) => {
 		return {
 			type: constants.COMMENT_CREATED,
@@ -32,6 +38,17 @@ export default {
 		return {
 			type: constants.ZONE_CREATED,
 			zone: zone
+		}
+	},
+	currentUserReceived: (user) => {
+		return {
+			type: constants.CURRENT_USER_RECEIVED,
+			user: user
+		}
+	},
+	logout: () => {
+		return {
+			type: constants.LOG_OUT
 		}
 	}
 }

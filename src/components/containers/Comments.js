@@ -8,28 +8,27 @@ import actions from '../../actions/actions'
 class Comments extends Component {
 	constructor(){
 		super()
-		this.state = {
-
-		}
 	}
 
 	submitComment(comment){
+		if(this.props.user == null){
+			alert("please sign up or log in to comment ")
+			return
+		}
+
 		let updatedComment = Object.assign({},comment)
 
 		const zone = this.props.zones[this.props.index]
 		updatedComment['zone'] = zone._id
+		updatedComment['username'] = this.props.user.username
 
 		APIManager.post('api/comment',updatedComment,(err,response) => {
 				if (err) {
 					alert('ERROR: ' + err)
 					return
 				} 
-				this.props.commentCreated(response.message)
+				this.props.commentCreated(response.result)
 		})
-	}
-
-	componentDidMount(){
-		
 	}
 
 	componentDidUpdate(){	
@@ -50,7 +49,7 @@ class Comments extends Component {
 
 		APIManager.get('/api/comment', {zone:zone._id}, (err,response) => {
 			if(err){
-				alert("ERROR: " + err) 
+				alert("ERROR: " + err.message) 
 				return
 			}
 			this.props.commentReceived(response.results,zone)
@@ -58,7 +57,6 @@ class Comments extends Component {
 	}
 
 	render(){
-
 		const style = styles.comment
 
 		const selectedZone = this.props.zones[this.props.index]
@@ -96,7 +94,8 @@ const stateToProps = (state) => {
 		commentMap: state.comment.map,
 		index: state.zone.selected,
 		zones: state.zone.list,
-		commentsLoaded: state.comment.loaded
+		commentsLoaded: state.comment.loaded,
+		user: state.account.user
 	}
 }
 

@@ -18,7 +18,7 @@ class Zones extends Component {
 				return
 			}
 
-			this.props.zoneCreated(response.message)
+			this.props.zoneCreated(response.result)
 			// let updatedList = Object.assign([],this.state.list)
 			// updatedList.push(response.message)
 			// this.setState({
